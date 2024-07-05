@@ -1,0 +1,98 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+<br/>
+<OButton>Hi</OButton>
+
+<ODropdownList Opt="new() { Data = items }" TKey="int" />
+<ODropdownList @bind-Value="model.Dropdown1" Opt="new() { Data = items }" />
+<br/>
+<br/>
+
+<OField Label="Multiselect">
+    <OMultiselect @bind-Value="model.Multiselect" Opt="new() { Data = items }" />
+</OField>
+
+<OField Label="Multicheck">
+    <OMulticheck @bind-Value="model.Multicheck" Opt="new() { Data = items }" />
+</OField>
+
+<OField Label="Combobox">
+    <OCombobox @bind-Value="model.Combobox" Opt="new() { Data = items }" />
+</OField>
+<br />
+
+
+<OPopup @ref="popup1" Opt="@(new(){ Modal = true, Title = "My Grid Popup", OutClickClose = true })">
+    <div style="padding: 1em;">
+        <OGrid Opt="gopt" />
+    </div>
+</OPopup>
+<OButton OnClick="() => popup1.Open()">Open popup</OButton>
+<br />
+
+@code {
+    OPopup popup1;
+
+    GridOpt<Product> gopt = new();
+
+    InputModel model = new();
+
+    IEnumerable<KeyContent> items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var products = new Product[]
+        {
+            new(){ Id = 1, Name = "Apple"},
+            new(){ Id = 2, Name = "Banana"},
+            new(){ Id = 3, Name = "Cherry"},
+            new(){ Id = 4, Name = "Mango"},
+            new(){ Id = 5, Name = "Papaya"},
+        };
+
+        items = products.Select(p => new KeyContent(p.Id, p.Name)).ToList();
+
+        gopt.GetQuery = () => products.AsQueryable();
+
+        gopt.KeyProp = p => p.Id;
+
+        gopt.ContentHeight = 300;
+
+        gopt.FilterRow = true;
+
+        gopt.Column(new()
+        {
+            For = m => m.Id,
+            Width = 100
+        });
+
+        gopt.Column(new()
+        {
+            For = m => m.Name           
+        })
+        .StringFilter(gopt, this);
+    }
+
+    public class Product
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+    }
+
+    public class InputModel
+    {
+        public int? Dropdown1 { get; set; }
+
+        public IEnumerable<int> Multiselect { get; set; }
+
+        public IEnumerable<int> Multicheck { get; set; }
+
+        public object Combobox { get; set; }
+    }
+}
